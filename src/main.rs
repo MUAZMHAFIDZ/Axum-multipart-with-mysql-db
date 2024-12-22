@@ -56,7 +56,7 @@ async fn setup_database(pool: &MySqlPool) -> Result<(), sqlx::Error> {
 async fn main() {
     dotenv().ok();
 
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL nothing!!!");
     let pool = match MySqlPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
@@ -65,11 +65,11 @@ async fn main() {
     
     {
         Ok(pool) => {
-            println!("Connection to the database is successful!");
+            println!("Connection to the DB Mwehehehe!");
             pool
         }
         Err(err) => {
-            println!("Error connect to the database: {:?}", err);
+            println!("Error connect to the DB TvT : {:?}", err);
             std::process::exit(1);
         }
     };
@@ -84,7 +84,7 @@ async fn main() {
 
     let app = create_router(Arc::new(AppState { db: pool.clone() })).layer(cors);
 
-    println!("Server started successfully");
+    println!("Server started Captain!!");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app).await.unwrap()
 }
