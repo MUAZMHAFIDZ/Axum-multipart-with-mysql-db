@@ -5,7 +5,7 @@ use axum::{
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::models::todo::Todo;
+use crate::models::todo::{Todo, TodoResponse};
 use crate::AppState;
 
 pub async fn create_todo(
@@ -26,9 +26,11 @@ pub async fn create_todo(
     Ok(Json(Todo { id: id, ..payload }))
 }
 
-pub async fn get_todos(State(state): State<Arc<AppState>>) -> Result<Json<Vec<Todo>>, StatusCode> {
+pub async fn get_todos(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<TodoResponse>>, StatusCode> {
     let query = "SELECT id, title, description FROM todos";
-    let todos = sqlx::query_as::<_, Todo>(query)
+    let todos = sqlx::query_as::<_, TodoResponse>(query)
         .fetch_all(&*state.db)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

@@ -1,6 +1,7 @@
 use axum::{extract::multipart::Multipart, http::StatusCode};
+use std::path::Path;
 use tokio::fs::File;
-use tokio::io::AsyncWriteExt; 
+use tokio::io::AsyncWriteExt;
 
 // =============================== This function without println ===============================
 // pub async fn save_file(mut multipart: Multipart) -> Result<String, StatusCode> {
@@ -49,12 +50,12 @@ use tokio::io::AsyncWriteExt;
 //     })? {
 
 //         if let Some(name) = field.name() {
-//             println!("Field name: {}", name);  
+//             println!("Field name: {}", name);
 //             if name == "file" {
 //                 let file = field.file_name().unwrap_or("uploaded_file");
 //                 file_name = Some(file.to_string());
 
-//                 println!("File name extracted: {}", file);  
+//                 println!("File name extracted: {}", file);
 
 //                 let mut file_content = Vec::new();
 
@@ -68,7 +69,7 @@ use tokio::io::AsyncWriteExt;
 //                 println!("File content length: {}", file_content.len());
 
 //                 let mut file_path = upload_dir.join(file_name.clone().unwrap());
-//                 println!("Saving file to: {:?}", file_path); 
+//                 println!("Saving file to: {:?}", file_path);
 
 //                 let mut f = File::create(file_path)
 //                     .await
@@ -97,7 +98,6 @@ use tokio::io::AsyncWriteExt;
 
 use uuid::Uuid;
 
-
 // ============================== using UUID as file name =====================================
 pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<String, StatusCode> {
     let mut file_name = None;
@@ -116,7 +116,7 @@ pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<Strin
                 let file_extension = std::path::Path::new(original_file_name)
                     .extension()
                     .and_then(std::ffi::OsStr::to_str)
-                    .unwrap_or(""); 
+                    .unwrap_or("");
                 let new_file_name = format!("{}.{}", Uuid::new_v4(), file_extension);
 
                 println!("Original file name: {}", original_file_name);
@@ -137,19 +137,15 @@ pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<Strin
                 let file_path = upload_dir.join(&new_file_name);
                 println!("Saving file to: {:?}", file_path);
 
-                let mut f = File::create(file_path)
-                    .await
-                    .map_err(|_| {
-                        println!("Error creating file");
-                        StatusCode::INTERNAL_SERVER_ERROR
-                    })?;
+                let mut f = File::create(file_path).await.map_err(|_| {
+                    println!("Error creating file");
+                    StatusCode::INTERNAL_SERVER_ERROR
+                })?;
 
-                f.write_all(&file_content)
-                    .await
-                    .map_err(|_| {
-                        println!("Error writing file content");
-                        StatusCode::INTERNAL_SERVER_ERROR
-                    })?;
+                f.write_all(&file_content).await.map_err(|_| {
+                    println!("Error writing file content");
+                    StatusCode::INTERNAL_SERVER_ERROR
+                })?;
             }
         }
     }
@@ -160,4 +156,21 @@ pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<Strin
     }
 
     file_name.ok_or(StatusCode::BAD_REQUEST)
+}
+
+///============= Menghapus file dari sistem file ===============
+pub async fn delete_file(file_path: &str) -> Result<(), StatusCode> {
+    let path = Path::new(file_path);
+    if path.exists() {
+        tokio::fs::remove_file(path).await.map_err(|err| {
+            println!("Error deleting file {}: {}", file_path, err);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+        println!("File deleted: {}", file_path);
+    } else {
+        println!("File not found: {}", file_path);
+        return Err(StatusCode::NOT_FOUND);
+    }
+
+    Ok(())
 }

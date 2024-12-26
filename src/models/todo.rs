@@ -10,6 +10,14 @@ pub struct Todo {
     pub description: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
+#[allow(non_snake_case)]
+pub struct TodoResponse {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+}
+
 fn generate_uuid() -> Uuid {
     Uuid::new_v4()
 }

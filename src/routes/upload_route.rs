@@ -1,7 +1,7 @@
 use crate::handlers::upload::{delete_upload, get_upload, upload_file};
 use crate::AppState;
 use axum::{
-    routing::{delete, get, post},
+    routing::{delete, post},
     Router,
 };
 use std::sync::Arc;

@@ -1,7 +1,7 @@
 use crate::handlers::todo::{create_todo, delete_todo, get_todos, update_todo};
 use crate::AppState;
 use axum::{
-    routing::{delete, get, post, put},
+    routing::{delete, post},
     Router,
 };
 use std::sync::Arc;
