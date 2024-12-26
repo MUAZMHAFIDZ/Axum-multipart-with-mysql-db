@@ -1,7 +1,14 @@
-mod controllers;
-mod models;
+mod handlers {
+    pub mod todo;
+    pub mod upload;
+}
+mod models {
+    pub mod todo;
+}
 mod routes;
-mod upload;
+mod lib {
+    pub mod upload;
+}
 
 use std::sync::Arc;
 
@@ -20,7 +27,6 @@ pub struct AppState {
 }
 
 async fn setup_database(pool: &MySqlPool) -> Result<(), sqlx::Error> {
-    
     let create_todos_table_query = r#"
         CREATE TABLE IF NOT EXISTS todos (
             id CHAR(36) PRIMARY KEY,
@@ -29,12 +35,9 @@ async fn setup_database(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         )
     "#;
 
-    sqlx::query(create_todos_table_query)
-        .execute(pool)
-        .await?;
+    sqlx::query(create_todos_table_query).execute(pool).await?;
     println!("Table 'todos' has been created successfully!");
 
-    
     let create_uploads_table_query = r#"
         CREATE TABLE IF NOT EXISTS uploads (
             id CHAR(36) PRIMARY KEY,
@@ -61,8 +64,6 @@ async fn main() {
         .max_connections(10)
         .connect(&database_url)
         .await
-    
-    
     {
         Ok(pool) => {
             println!("Connection to the DB Mwehehehe!");
