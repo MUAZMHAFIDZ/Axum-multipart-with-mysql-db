@@ -9,8 +9,8 @@ mod routes;
 mod lib {
     pub mod upload;
 }
-
-use std::sync::Arc;
+mod db;
+mod state;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -18,74 +18,42 @@ use axum::http::{
 };
 use dotenv::dotenv;
 use routes::create_router;
+use state::AppState;
+use std::sync::Arc;
 use tower_http::cors::CorsLayer;
-
-use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
-
-pub struct AppState {
-    db: MySqlPool,
-}
-
-async fn setup_database(pool: &MySqlPool) -> Result<(), sqlx::Error> {
-    let create_todos_table_query = r#"
-        CREATE TABLE IF NOT EXISTS todos (
-            id CHAR(36) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL
-        )
-    "#;
-
-    sqlx::query(create_todos_table_query).execute(pool).await?;
-    println!("Table 'todos' has been created successfully!");
-
-    let create_uploads_table_query = r#"
-        CREATE TABLE IF NOT EXISTS uploads (
-            id CHAR(36) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            file_name VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    "#;
-
-    sqlx::query(create_uploads_table_query)
-        .execute(pool)
-        .await?;
-    println!("Table 'uploads' has been created successfully!");
-
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
 
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL nothing!!!");
-    let pool = match MySqlPoolOptions::new()
-        .max_connections(10)
-        .connect(&database_url)
-        .await
-    {
+    // Setup database
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is missing!");
+    let pool = match db::create_pool(&database_url).await {
         Ok(pool) => {
-            println!("Connection to the DB Mwehehehe!");
+            println!("Connected to the database!");
             pool
         }
         Err(err) => {
-            println!("Error connect to the DB TvT : {:?}", err);
+            eprintln!("Failed to connect to the database: {:?}", err);
             std::process::exit(1);
         }
     };
 
-    setup_database(&pool).await;
+    db::setup_database(&pool).await.unwrap();
 
+    // Setup CORS
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = create_router(Arc::new(AppState { db: pool.clone() })).layer(cors);
+    // Create app state and router
+    let app_state = AppState { db: Arc::new(pool) };
+    let app = create_router(Arc::new(app_state)).layer(cors);
 
-    println!("Server started Captain!!");
+    // Start the server
+    println!("Server is running on http://0.0.0.0:8000");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
-    axum::serve(listener, app).await.unwrap()
+    axum::serve(listener, app).await.unwrap();
 }

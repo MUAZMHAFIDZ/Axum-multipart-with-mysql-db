@@ -36,7 +36,7 @@ pub async fn upload_file(
                 .bind(&unique_id.to_string())
                 .bind(&title)
                 .bind(&file_name)
-                .execute(&state.db)
+                .execute(&*state.db)
                 .await
             {
                 Ok(_) => Ok((

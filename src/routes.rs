@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use axum::{
-    routing::{get, get_service, post},
+    routing::{delete, get, get_service, post, put},
     Router,
 };
 use tower_http::services::ServeDir;
 
 use crate::{
-    handlers::todo::{create_todo, get_todos},
+    handlers::todo::{create_todo, delete_todo, get_todos, update_todo},
     handlers::upload::upload_file,
     AppState,
 };
@@ -20,6 +20,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         )
         .route("/api/todos/", post(create_todo))
         .route("/api/todos/", get(get_todos))
+        .route("/api/todos/:id", delete(delete_todo))
+        .route("/api/todos/:id", put(update_todo))
         .route("/api/upload/", post(upload_file))
         .with_state(app_state)
 }
