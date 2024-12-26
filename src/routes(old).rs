@@ -8,7 +8,7 @@ use tower_http::services::ServeDir;
 
 use crate::{
     handlers::todo::{create_todo, delete_todo, get_todos, update_todo},
-    handlers::upload::upload_file,
+    handlers::upload::{delete_upload, get_upload, upload_file},
     AppState,
 };
 
@@ -23,5 +23,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/api/todos/:id", delete(delete_todo))
         .route("/api/todos/:id", put(update_todo))
         .route("/api/upload/", post(upload_file))
+        .route("/api/upload/", get(get_todos))
+        .route("/api/upload/:id", delete(delete_todo))
         .with_state(app_state)
 }

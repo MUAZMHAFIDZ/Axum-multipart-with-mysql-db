@@ -1,5 +1,5 @@
 use axum::{
-    extract::{multipart::Multipart, State},
+    extract::{multipart::Multipart, Json, Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
@@ -7,6 +7,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::lib::upload::save_file;
+use crate::models::upload::Upload;
 use crate::AppState;
 
 pub async fn upload_file(
@@ -54,4 +55,31 @@ pub async fn upload_file(
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
+}
+
+pub async fn get_upload(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<Upload>>, StatusCode> {
+    let query = "SELECT id, title, file_name FROM uploads";
+    let todos = sqlx::query_as::<_, Upload>(query)
+        .fetch_all(&*state.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(Json(todos))
+}
+
+pub async fn delete_upload(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, StatusCode> {
+    let query = "DELETE FROM uploads WHERE id = ?";
+
+    sqlx::query(query)
+        .bind(id.to_string())
+        .execute(&*state.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(StatusCode::NO_CONTENT)
 }

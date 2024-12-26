@@ -4,6 +4,7 @@ mod handlers {
 }
 mod models {
     pub mod todo;
+    pub mod upload;
 }
 mod routes;
 mod lib {
