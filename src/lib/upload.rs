@@ -3,102 +3,9 @@ use std::path::Path;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-// =============================== This function without println ===============================
-// pub async fn save_file(mut multipart: Multipart) -> Result<String, StatusCode> {
-//     let mut file_name = None;
-
-//     let upload_dir = std::path::Path::new("public/image");
-
-//     while let Some(mut field) = multipart.next_field().await.map_err(|_| StatusCode::BAD_REQUEST)? {
-
-//         if let Some(name) = field.name() {
-//             if name == "file" {
-//                 let file = field.file_name().unwrap_or("uploaded_file");
-//                 file_name = Some(file.to_string());
-//                 let mut file_content = Vec::new();
-
-//                 while let Some(chunk) = field.chunk().await.map_err(|_| StatusCode::BAD_REQUEST)? {
-//                     file_content.extend_from_slice(&chunk);
-//                 }
-
-//                 let mut file_path = upload_dir.join(file_name.clone().unwrap());
-//                 let mut f = File::create(file_path)
-//                     .await
-//                     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-//                 f.write_all(&file_content)
-//                     .await
-//                     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-//             }
-//         }
-//     }
-
-//     file_name.ok_or(StatusCode::BAD_REQUEST)
-// }
-
-// ======================== using original file name ==============================
-// pub async fn save_file(mut multipart: Multipart) -> Result<String, StatusCode> {
-//     let mut file_name = None;
-
-//     let upload_dir = std::path::Path::new("public/image");
-
-//     println!("Upload directory: {:?}", upload_dir);
-
-//     while let Some(mut field) = multipart.next_field().await.map_err(|_| {
-//         println!("Error reading multipart field");
-//         StatusCode::BAD_REQUEST
-//     })? {
-
-//         if let Some(name) = field.name() {
-//             println!("Field name: {}", name);
-//             if name == "file" {
-//                 let file = field.file_name().unwrap_or("uploaded_file");
-//                 file_name = Some(file.to_string());
-
-//                 println!("File name extracted: {}", file);
-
-//                 let mut file_content = Vec::new();
-
-//                 while let Some(chunk) = field.chunk().await.map_err(|_| {
-//                     println!("Error reading chunk");
-//                     StatusCode::BAD_REQUEST
-//                 })? {
-//                     file_content.extend_from_slice(&chunk);
-//                 }
-
-//                 println!("File content length: {}", file_content.len());
-
-//                 let mut file_path = upload_dir.join(file_name.clone().unwrap());
-//                 println!("Saving file to: {:?}", file_path);
-
-//                 let mut f = File::create(file_path)
-//                     .await
-//                     .map_err(|_| {
-//                         println!("Error creating file");
-//                         StatusCode::INTERNAL_SERVER_ERROR
-//                     })?;
-
-//                 f.write_all(&file_content)
-//                     .await
-//                     .map_err(|_| {
-//                         println!("Error writing file content");
-//                         StatusCode::INTERNAL_SERVER_ERROR
-//                     })?;
-//             }
-//         }
-//     }
-
-//     match &file_name {
-//         Some(name) => println!("File saved as: {}", name),
-//         None => println!("No file saved"),
-//     }
-
-//     file_name.ok_or(StatusCode::BAD_REQUEST)
-// }
-
 use uuid::Uuid;
 
-// ============================== using UUID as file name =====================================
+// ============================== adding file, using UUID as file name =====================================
 pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<String, StatusCode> {
     let mut file_name = None;
 
@@ -158,7 +65,7 @@ pub async fn save_file(mut multipart: Multipart, locate: String) -> Result<Strin
     file_name.ok_or(StatusCode::BAD_REQUEST)
 }
 
-///============= Menghapus file dari sistem file ===============
+///============= delete file ===============
 pub async fn delete_file(file_path: &str) -> Result<(), StatusCode> {
     let path = Path::new(file_path);
     if path.exists() {

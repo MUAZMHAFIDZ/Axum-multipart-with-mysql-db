@@ -1,17 +1,23 @@
 mod handlers {
+    pub mod auth;
     pub mod todo;
     pub mod upload;
 }
 mod models {
     pub mod todo;
     pub mod upload;
+    pub mod user;
 }
 mod routes;
 mod lib {
+    pub mod jwt;
     pub mod upload;
 }
 mod db;
 mod state;
+mod middlewares {
+    pub mod protect;
+}
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},

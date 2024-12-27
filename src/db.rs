@@ -34,5 +34,18 @@ pub async fn setup_database(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         .await?;
     println!("Table 'uploads' has been created successfully!");
 
+    let create_users_table_query = r#"
+        CREATE TABLE IF NOT EXISTS users (
+            id CHAR(36) PRIMARY KEY,
+            username VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            fullname VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    "#;
+
+    sqlx::query(create_users_table_query).execute(pool).await?;
+    println!("Table 'users' has been created successfully!");
+
     Ok(())
 }
