@@ -1,9 +1,7 @@
 use axum::{body::Body, http::Request};
 use chrono::{Duration, Utc};
-use cookie::CookieJar;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use std::clone;
 
 const JWT_SECRET: &str = "your-secret-key";
 
@@ -42,14 +40,12 @@ pub fn verify_jwt(token: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
 }
 
 pub fn get_jwt_cookie(req: &Request<Body>) -> Option<String> {
-    // Ambil header "cookie" dari request
     if let Some(cookie_header) = req.headers().get("cookie") {
-        // Cari cookie dengan nama "jwt"
         if let Ok(cookie_str) = cookie_header.to_str() {
             for cookie in cookie_str.split(';') {
                 let trimmed = cookie.trim();
                 if trimmed.starts_with("jwt=") {
-                    return Some(trimmed[4..].to_string()); // Ambil nilai setelah "jwt="
+                    return Some(trimmed[4..].to_string());
                 }
             }
         }

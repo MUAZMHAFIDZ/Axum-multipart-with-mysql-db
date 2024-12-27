@@ -72,19 +72,18 @@ pub async fn login(
     Err(StatusCode::UNAUTHORIZED)
 }
 
-pub async fn protected_route(
-    State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
-) -> Result<Json<AuthResponse>, StatusCode> {
-    // Ambil token dari header 'Authorization' atau cookie
-    let token = match headers.get("Authorization") {
-        Some(value) => value.to_str().unwrap_or("").replace("Bearer ", ""),
-        None => return Err(StatusCode::UNAUTHORIZED),
-    };
+// pub async fn protected_route(
+//     State(state): State<Arc<AppState>>,
+//     headers: HeaderMap,
+// ) -> Result<Json<AuthResponse>, StatusCode> {
+//     let token = match headers.get("Authorization") {
+//         Some(value) => value.to_str().unwrap_or("").replace("Bearer ", ""),
+//         None => return Err(StatusCode::UNAUTHORIZED),
+//     };
 
-    let claims = verify_jwt(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
+//     let claims = verify_jwt(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    Ok(Json(AuthResponse {
-        message: format!("Welcome, user {}!", claims.sub),
-    }))
-}
+//     Ok(Json(AuthResponse {
+//         message: format!("Welcome, user {}!", claims.sub),
+//     }))
+// }

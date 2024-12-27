@@ -6,7 +6,6 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
-use cookie::CookieJar;
 
 pub async fn protect(mut req: Request<Body>, next: Next) -> Result<Response, Response> {
     let token = get_jwt_cookie(&req);
