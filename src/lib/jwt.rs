@@ -52,3 +52,7 @@ pub fn get_jwt_cookie(req: &Request<Body>) -> Option<String> {
     }
     None
 }
+
+pub fn clear_jwt_cookie() -> String {
+    "jwt=; HttpOnly; Secure; Path=/; Max-Age=0".to_string()
+}

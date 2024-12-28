@@ -1,6 +1,6 @@
 use crate::models::user::{AuthResponse, LoginPayload, User};
 use crate::AppState;
-use axum::http::StatusCode;
+use axum::http::{header, StatusCode};
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
@@ -11,11 +11,11 @@ use sqlx::Error;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::lib::jwt::{create_jwt, set_jwt_cookie, verify_jwt};
+use crate::lib::jwt::{clear_jwt_cookie, create_jwt, set_jwt_cookie};
 
 pub async fn register(
     State(state): State<Arc<AppState>>,
-    Json(mut payload): Json<User>,
+    Json(payload): Json<User>,
 ) -> Result<Json<AuthResponse>, StatusCode> {
     let id = Uuid::new_v4();
 
@@ -70,6 +70,17 @@ pub async fn login(
     }
 
     Err(StatusCode::UNAUTHORIZED)
+}
+
+pub async fn logout() -> impl IntoResponse {
+    let cookie = clear_jwt_cookie();
+
+    (
+        [(header::SET_COOKIE, cookie)],
+        Json(AuthResponse {
+            message: "Logout successful".to_string(),
+        }),
+    )
 }
 
 // pub async fn protected_route(
